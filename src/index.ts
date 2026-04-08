@@ -1,9 +1,10 @@
-import express from 'express';
+import express, {type Express, type Request, type Response} from 'express';
 
-const app = express()
+const app:Express = express()
 
-app.get('/', (req, res) => {
+app.get('/', (req:Request, res:Response) => {
     res.send('Working')
+    
 })
 
 app.listen(3000, () => {

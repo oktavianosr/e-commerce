@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npx nodemon" 
+    "start": "npx nodemon"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +19,8 @@
     "typescript": "^6.0.2"
   },
   "dependencies": {
-    "express": "^5.2.1"
+    "@prisma/client": "^7.7.0",
+    "express": "^5.2.1",
+    "prisma": "^7.7.0"
   }
 }
