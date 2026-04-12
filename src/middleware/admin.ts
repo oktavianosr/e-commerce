@@ -1,8 +1,8 @@
-import type { RequestHandler } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { ErrorCode } from '../exceptions/root.js';
 import { UnauthorizedException } from '../exceptions/unauthorized.js';
 
-const adminMiddleware: RequestHandler = async (req, res, next) => {
+const adminMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
 
     if (!user) {

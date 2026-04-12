@@ -1,11 +1,11 @@
-import type { RequestHandler } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { UnauthorizedException } from '../exceptions/unauthorized.js';
 import { ErrorCode } from '../exceptions/root.js';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../secrets.js';
 import { prismaClient } from '../index.js';
 
-const authMiddleware: RequestHandler = async (req, res, next) => {
+const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     // 1. extract the token from header
     const token = req.headers.authorization;
 
