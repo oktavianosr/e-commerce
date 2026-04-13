@@ -1,5 +1,7 @@
 import type { Response } from 'express';
 
+export type { Response };
+
 export class BaseController {
     protected respondSuccess(
         res: Response,

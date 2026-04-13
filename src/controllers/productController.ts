@@ -3,9 +3,10 @@ import { prismaClient } from '../index.js';
 import { NotFoundException } from '../exceptions/not-found.js';
 import { ErrorCode } from '../exceptions/root.js';
 import { BaseController } from './base.controller.js';
+import type { AuthenticatedRequest } from '../types/authenticated-request.js';
 
 class ProductController extends BaseController {
-    createProduct = async (req: Request, res: Response) => {
+    createProduct = async (req: AuthenticatedRequest, res: Response) => {
         const product = await prismaClient.product.create({
             data: {
                 ...req.body,
@@ -16,7 +17,7 @@ class ProductController extends BaseController {
         this.respondSuccess(res, product, 'Product created successfully', 201);
     };
 
-    updateProduct = async (req: Request, res: Response) => {
+    updateProduct = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const body = req.body;
             if (body.tags) {
@@ -37,7 +38,7 @@ class ProductController extends BaseController {
         }
     };
 
-    deleteProduct = async (req: Request, res: Response) => {
+    deleteProduct = async (req: AuthenticatedRequest, res: Response) => {
         // Assignment
     };
 
@@ -48,14 +49,20 @@ class ProductController extends BaseController {
             take: 5,
         });
 
-        this.respondSuccess(res, products, 'Products retrieved successfully', 200, {
-            count,
-            skip: Number(req.query.skip || 0),
-            take: 5,
-        });
+        this.respondSuccess(
+            res,
+            products,
+            'Products retrieved successfully',
+            200,
+            {
+                count,
+                skip: Number(req.query.skip || 0),
+                take: 5,
+            }
+        );
     };
 
-    getProductById = async (req: Request, res: Response) => {
+    getProductById = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const product = await prismaClient.product.findFirstOrThrow({
                 where: { id: Number(req.params.id) },

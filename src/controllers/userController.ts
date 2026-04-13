@@ -1,10 +1,9 @@
-import type { Response } from 'express';
 import type { AuthenticatedRequest } from '../types/authenticated-request.js';
 import { AddressSchema } from '../schema/users.js';
 import { prismaClient } from '../index.js';
 import { NotFoundException } from '../exceptions/not-found.js';
 import { ErrorCode } from '../exceptions/root.js';
-import { BaseController } from './base.controller.js';
+import { BaseController, type Response } from './base.controller.js';
 
 class UserController extends BaseController {
     addAddress = async (req: AuthenticatedRequest, res: Response) => {
