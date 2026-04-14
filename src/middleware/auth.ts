@@ -5,6 +5,10 @@ import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../secrets.js';
 import { prismaClient } from '../index.js';
 
+interface JwtPayload {
+    userId: number;
+}
+
 const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     // 1. extract the token from header
     const token = req.headers.authorization;
@@ -17,7 +21,7 @@ const authMiddleware = async (req: Request, res: Response, next: NextFunction) =
     }
     try {
         // 3. if token is present, verify it and  extract the payload
-        const payload = jwt.verify(token, JWT_SECRET) as any;
+        const payload = jwt.verify(token, JWT_SECRET) as JwtPayload;
         // 4. to get the user from the payload
         const user = await prismaClient.user.findFirst({
             where: { id: payload.userId },

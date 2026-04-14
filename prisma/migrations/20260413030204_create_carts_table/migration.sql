@@ -1,5 +1,5 @@
 -- CreateTable
-CREATE TABLE `cart_items` (
+CREATE TABLE `mt_cart_items` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `userId` INTEGER NOT NULL,
     `productId` INTEGER NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE `cart_items` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
-ALTER TABLE `cart_items` ADD CONSTRAINT `cart_items_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `mt_cart_items` ADD CONSTRAINT `mt_cart_items_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `mt_users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `cart_items` ADD CONSTRAINT `cart_items_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `mt_cart_items` ADD CONSTRAINT `mt_cart_items_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `mt_products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

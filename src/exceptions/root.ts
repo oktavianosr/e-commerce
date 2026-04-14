@@ -4,13 +4,13 @@ export class HttpException extends Error {
     message: string;
     errorCode: ErrorCode;
     statusCode: number;
-    errors: any;
+    errors: unknown;
 
     constructor(
         message: string,
         errorCode: ErrorCode,
         statusCode: number,
-        error: any = null
+        error: unknown
     ) {
         super(message);
         this.message = message;
@@ -29,4 +29,6 @@ export enum ErrorCode {
     INTERNAL_EXCEPTION = 3001,
     UNAUTHORIZED = 4001,
     PRODUCT_NOT_FOUND = 4002,
+    ORDER_NOT_FOUND = 4003,
+    INVALID_ROLE = 4004,
 }

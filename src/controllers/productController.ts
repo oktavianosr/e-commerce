@@ -4,6 +4,7 @@ import { NotFoundException } from '../exceptions/not-found.js';
 import { ErrorCode } from '../exceptions/root.js';
 import { BaseController } from './base.controller.js';
 import type { AuthenticatedRequest } from '../types/authenticated-request.js';
+import { getPagination, buildPaginationMeta } from '../utils/pagination.js';
 
 class ProductController extends BaseController {
     createProduct = async (req: AuthenticatedRequest, res: Response) => {
@@ -43,22 +44,18 @@ class ProductController extends BaseController {
     };
 
     listProducts = async (req: Request, res: Response) => {
-        const count = await prismaClient.product.count();
-        const products = await prismaClient.product.findMany({
-            skip: Number(req.query.skip || 0),
-            take: 5,
-        });
+        const pagination = getPagination(req.query, 10);
+        const [count, products] = await Promise.all([
+            prismaClient.product.count(),
+            prismaClient.product.findMany(pagination),
+        ]);
 
         this.respondSuccess(
             res,
             products,
             'Products retrieved successfully',
             200,
-            {
-                count,
-                skip: Number(req.query.skip || 0),
-                take: 5,
-            }
+            buildPaginationMeta(count, pagination)
         );
     };
 
