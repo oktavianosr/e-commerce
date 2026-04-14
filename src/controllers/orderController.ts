@@ -66,11 +66,61 @@ class OrderController extends BaseController {
         this.respondSuccess(res, order, 'Order created successfully', 201);
     };
 
-    listOrders = async (req: AuthenticatedRequest, res: Response) => {};
+    listOrders = async (req: AuthenticatedRequest, res: Response) => {
+        const orders = await prismaClient.order.findMany({
+            where: {
+                userId: req.user.id,
+            },
+        });
+        this.respondSuccess(res, orders, 'Orders retrieved successfully');
+    };
 
-    cancelOrder = async (req: AuthenticatedRequest, res: Response) => {};
+    cancelOrder = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            const order = await prismaClient.order.update({
+                where: { id: Number(req.params.id) },
+                data: { status: 'CANCELLED' },
+            });
+            await prismaClient.orderEvent.create({
+                data: {
+                    orderId: order.id,
+                    status: 'CANCELLED',
+                },
+            });
+            this.respondSuccess(res, order, 'Order cancelled successfully');
+        } catch (err) {
+            if (err instanceof NotFoundException) {
+                this.respondError(res, err.message, 404);
+            } else {
+                this.respondError(res, 'Unknown error', 404);
+            }
+        }
+    };
 
-    getOrderById = async (req: AuthenticatedRequest, res: Response) => {};
+    getOrderById = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            const order = await prismaClient.order.findUnique({
+                where: { id: Number(req.params.id) },
+                include: {
+                    products: true,
+                    events: true,
+                },
+            });
+            if (!order) {
+                throw new NotFoundException(
+                    'Order not found',
+                    ErrorCode.ORDER_NOT_FOUND
+                );
+            }
+            this.respondSuccess(res, order, 'Order retrieved successfully');
+        } catch (err) {
+            if (err instanceof NotFoundException) {
+                this.respondError(res, err.message, 404);
+            } else {
+                this.respondError(res, 'Unknown error', 404);
+            }
+        }
+    };
 }
 
 export default new OrderController();
