@@ -1,5 +1,5 @@
 -- CreateTable
-CREATE TABLE `products` (
+CREATE TABLE `mt_products` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `description` VARCHAR(191) NOT NULL,

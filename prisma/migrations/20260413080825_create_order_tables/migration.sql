@@ -3,7 +3,7 @@ ALTER TABLE `users` ADD COLUMN `defaultBillingAddress` INTEGER NULL,
     ADD COLUMN `defaultShippingAddress` INTEGER NULL;
 
 -- CreateTable
-CREATE TABLE `orders` (
+CREATE TABLE `mt_orders` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `userId` INTEGER NOT NULL,
     `netAmount` DECIMAL(65, 30) NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE `orders` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `order_products` (
+CREATE TABLE `tr_order_products` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `orderId` INTEGER NOT NULL,
     `productId` INTEGER NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE `order_products` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `order_events` (
+CREATE TABLE `rf_order_events` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `orderId` INTEGER NOT NULL,
     `status` ENUM('PENDING', 'ACCEPTED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
@@ -38,13 +38,13 @@ CREATE TABLE `order_events` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
-ALTER TABLE `orders` ADD CONSTRAINT `orders_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `mt_orders` ADD CONSTRAINT `mt_orders_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `mt_users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `order_products` ADD CONSTRAINT `order_products_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `orders`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `tr_order_products` ADD CONSTRAINT `tr_order_products_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `mt_orders`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `order_products` ADD CONSTRAINT `order_products_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `tr_order_products` ADD CONSTRAINT `tr_order_products_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `order_events` ADD CONSTRAINT `order_events_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `orders`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `rf_order_events` ADD CONSTRAINT `rf_order_events_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `mt_orders`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

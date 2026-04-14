@@ -3,12 +3,12 @@ import type { Response } from 'express';
 export type { Response };
 
 export class BaseController {
-    protected respondSuccess(
+    protected respondSuccess<TData, TMeta = null>(
         res: Response,
-        data: any = null,
+        data: TData,
         message: string = 'Success',
         status: number = 200,
-        meta: any = null
+        meta?: TMeta
     ): void {
         res.status(status).json({
             success: true,
@@ -18,11 +18,11 @@ export class BaseController {
         });
     }
 
-    protected respondError(
+    protected respondError<TErrors>(
         res: Response,
         message: string = 'Error',
         status: number = 400,
-        errors: any = null
+        errors?: TErrors
     ): void {
         res.status(status).json({
             success: false,

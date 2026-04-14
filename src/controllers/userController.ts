@@ -4,6 +4,10 @@ import { prismaClient } from '../index.js';
 import { NotFoundException } from '../exceptions/not-found.js';
 import { ErrorCode } from '../exceptions/root.js';
 import { BaseController, type Response } from './base.controller.js';
+import { getPagination, buildPaginationMeta } from '../utils/pagination.js';
+import { UnauthorizedException } from '../exceptions/unauthorized.js';
+import { BadRequestException } from '../exceptions/bad-request.js';
+import { Role } from '../generated/prisma/index.js';
 
 class UserController extends BaseController {
     addAddress = async (req: AuthenticatedRequest, res: Response) => {
@@ -52,6 +56,63 @@ class UserController extends BaseController {
         });
 
         this.respondSuccess(res, addresses, 'Addresses retrieved successfully');
+    };
+
+    listUsers = async (req: AuthenticatedRequest, res: Response) => {
+        const pagination = getPagination(req.query);
+        const [count, users] = await Promise.all([
+            prismaClient.user.count(),
+            prismaClient.user.findMany(pagination),
+        ]);
+
+        this.respondSuccess(
+            res,
+            users,
+            'Users retrieved successfully',
+            200,
+            buildPaginationMeta(count, pagination)
+        );
+    };
+
+    changeUserRole = async (req: AuthenticatedRequest, res: Response) => {
+        if (req.user.role !== Role.ADMIN) {
+            throw new UnauthorizedException(
+                'Only admins can change user roles',
+                ErrorCode.UNAUTHORIZED
+            );
+        }
+
+        const { role } = req.body;
+
+        if (!Object.values(Role).includes(role)) {
+            throw new BadRequestException(
+                `Invalid role. Allowed values: ${Object.values(Role).join(', ')}`,
+                ErrorCode.INVALID_ROLE
+            );
+        }
+
+        const updated = await prismaClient.user.update({
+            where: { id: Number(req.params.id) },
+            data: { role },
+        });
+
+        this.respondSuccess(res, updated, 'User role updated successfully');
+    };
+
+    getUserById = async (req: AuthenticatedRequest, res: Response) => {
+        const user = await prismaClient.user.findUnique({
+            where: { id: Number(req.params.id) },
+            include: { addresses: true },
+        });
+
+        if (!user) {
+            throw new NotFoundException(
+                'User not found',
+                ErrorCode.USER_NOT_FOUND
+            );
+        }
+
+        this.respondSuccess(res, user, 'User retrieved successfully');
     };
 }
 

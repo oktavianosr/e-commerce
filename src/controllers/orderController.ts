@@ -3,6 +3,7 @@ import { prismaClient } from '../index.js';
 import type { AuthenticatedRequest } from '../types/authenticated-request.js';
 import { BaseController, type Response } from './base.controller.js';
 import { ErrorCode } from '../exceptions/root.js';
+import { getPagination, buildPaginationMeta } from '../utils/pagination.js';
 
 class OrderController extends BaseController {
     createOrder = async (req: AuthenticatedRequest, res: Response) => {
@@ -67,12 +68,20 @@ class OrderController extends BaseController {
     };
 
     listOrders = async (req: AuthenticatedRequest, res: Response) => {
-        const orders = await prismaClient.order.findMany({
-            where: {
-                userId: req.user.id,
-            },
-        });
-        this.respondSuccess(res, orders, 'Orders retrieved successfully');
+        const pagination = getPagination(req.query);
+        const where = { userId: req.user.id };
+        const [count, orders] = await Promise.all([
+            prismaClient.order.count({ where }),
+            prismaClient.order.findMany({ where, ...pagination }),
+        ]);
+
+        this.respondSuccess(
+            res,
+            orders,
+            'Orders retrieved successfully',
+            200,
+            buildPaginationMeta(count, pagination)
+        );
     };
 
     cancelOrder = async (req: AuthenticatedRequest, res: Response) => {
