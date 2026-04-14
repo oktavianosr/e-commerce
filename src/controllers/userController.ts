@@ -16,6 +16,18 @@ class UserController extends BaseController {
             },
         });
 
+        const user = await prismaClient.user.findUnique({
+            where: { id: req.user.id },
+            select: { defaultShippingAddress: true },
+        });
+
+        if (!user?.defaultShippingAddress) {
+            await prismaClient.user.update({
+                where: { id: req.user.id },
+                data: { defaultShippingAddress: address.id },
+            });
+        }
+
         this.respondSuccess(res, address, 'Address added successfully', 201);
     };
 
