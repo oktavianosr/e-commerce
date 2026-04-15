@@ -4,6 +4,8 @@ import type { AuthenticatedRequest } from '../types/authenticated-request.js';
 import { BaseController, type Response } from './base.controller.js';
 import { ErrorCode } from '../exceptions/root.js';
 import { getPagination, buildPaginationMeta } from '../utils/pagination.js';
+import type { Prisma } from '../generated/prisma/index.js';
+import { OrderEventStatus } from '../generated/prisma/index.js';
 
 class OrderController extends BaseController {
     createOrder = async (req: AuthenticatedRequest, res: Response) => {
@@ -129,6 +131,87 @@ class OrderController extends BaseController {
                 this.respondError(res, 'Unknown error', 404);
             }
         }
+    };
+
+    listAllOrders = async (req: AuthenticatedRequest, res: Response) => {
+        const pagination = getPagination(req.query);
+        const whereClause: Prisma.OrderWhereInput = {};
+        const status = req.query.status as OrderEventStatus | undefined;
+        if (status && Object.values(OrderEventStatus).includes(status)) {
+            whereClause.status = status;
+        }
+
+        const [count, orders] = await Promise.all([
+            prismaClient.order.count({ where: whereClause }),
+            prismaClient.order.findMany({ where: whereClause, ...pagination }),
+        ]);
+
+        this.respondSuccess(
+            res,
+            orders,
+            'Orders retrieved successfully',
+            200,
+            buildPaginationMeta(count, pagination)
+        );
+    };
+
+    changeStatus = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            const order = await prismaClient.order.findUnique({
+                where: { id: Number(req.params.id) },
+            });
+            if (!order) {
+                throw new NotFoundException(
+                    'Order not found',
+                    ErrorCode.ORDER_NOT_FOUND
+                );
+            }
+            const updatedOrder = await prismaClient.order.update({
+                where: { id: Number(req.params.id) },
+                data: { status: req.body.status },
+            });
+            await prismaClient.orderEvent.create({
+                data: {
+                    orderId: order.id,
+                    status: req.body.status,
+                },
+            });
+            this.respondSuccess(
+                res,
+                updatedOrder,
+                'Order status updated successfully'
+            );
+        } catch (err) {
+            if (err instanceof NotFoundException) {
+                this.respondError(res, err.message, 404);
+            } else {
+                this.respondError(res, 'Unknown error', 404);
+            }
+        }
+    };
+
+    listUserOrders = async (req: AuthenticatedRequest, res: Response) => {
+        const pagination = getPagination(req.query);
+        const whereClause: Prisma.OrderWhereInput = {
+            userId: Number(req.params.id),
+        };
+        const status = req.query.status as OrderEventStatus | undefined;
+        if (status && Object.values(OrderEventStatus).includes(status)) {
+            whereClause.status = status;
+        }
+
+        const [count, orders] = await Promise.all([
+            prismaClient.order.count({ where: whereClause }),
+            prismaClient.order.findMany({ where: whereClause, ...pagination }),
+        ]);
+
+        this.respondSuccess(
+            res,
+            orders,
+            'Orders retrieved successfully',
+            200,
+            buildPaginationMeta(count, pagination)
+        );
     };
 }
 
